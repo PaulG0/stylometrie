@@ -1,0 +1,264 @@
+/* ==========================================================================
+   STYLE IMPÉRIAL UNIFIÉ — BLEU ROYAL, TOUCHES D'OR & BORDEAUX
+   ========================================================================== */
+
+* {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.root {
+    -fx-font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    -fx-background-color: #f8fafc;
+}
+
+/* --- BANDEAU HEADER UNIFIÉ --- */
+.header-banner {
+    -fx-background-color: linear-gradient(to right, #0a1320, #0f1c2e, #18283d);
+    -fx-border-color: #d4af37;
+    -fx-border-width: 0 0 1px 0;
+}
+
+/* LOGO SUR 2 LIGNES */
+.logo-box-large {
+    -fx-background-color: rgba(212, 175, 55, 0.12);
+    -fx-border-color: #d4af37;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 6px;
+    -fx-min-width: 48px;
+    -fx-min-height: 48px;
+    -fx-pref-width: 48px;
+    -fx-pref-height: 48px;
+    -fx-alignment: center;
+}
+
+.logo-icon-text-large {
+    -fx-text-fill: #f1c40f;
+    -fx-font-size: 26px;
+}
+
+/* TITRES EN-TÊTE */
+.header-title {
+    -fx-font-family: "Georgia", serif;
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f1c40f;
+}
+
+.header-title-sub {
+    -fx-font-family: "Georgia", serif;
+    -fx-font-size: 15px;
+    -fx-text-fill: #cbd5e1;
+}
+
+/* BARRE DE MENU */
+.header-menu-bar {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.header-menu-bar .menu {
+    -fx-background-color: transparent;
+    -fx-padding: 4px 10px;
+    -fx-background-radius: 6px;
+}
+
+.header-menu-bar .menu:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+}
+
+.header-menu-bar .menu .label {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+}
+
+/* --- MENUS DÉROULANTS (CONTEXT-MENU POP-UP) EN OR & BLEU --- */
+.context-menu {
+    -fx-background-color: #0a1320;
+    -fx-border-color: #d4af37; /* Bordure générale du sous-menu en couleur Or */
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 5px 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.35), 10, 0, 0, 4);
+}
+
+.context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-padding: 8px 18px;
+}
+
+.context-menu .menu-item .label {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 13px;
+}
+
+.context-menu .menu-item:hover,
+.context-menu .menu-item:focused {
+    -fx-background-color: #1e293b;
+}
+
+.context-menu .menu-item:hover .label,
+.context-menu .menu-item:focused .label {
+    -fx-text-fill: #f1c40f; /* Texte Or au survol */
+}
+
+/* SÉPARATEURS DANS LE MENU EN COULEUR OR */
+.separator-menu-item .line {
+    -fx-border-color: #d4af37;
+    -fx-border-width: 1px 0 0 0;
+    -fx-background-color: transparent;
+}
+
+/* --- BARRE D'ONGLETS --- */
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: #0a1320;
+}
+
+.tab {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 8px 8px 0 0;
+    -fx-padding: 8px 20px;
+    -fx-margin: 0 4px 0 0;
+    -fx-cursor: hand;
+}
+
+.tab:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.tab:selected {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #d4af37;
+    -fx-border-width: 3px 0 0 0;
+    -fx-border-radius: 8px 8px 0 0;
+}
+
+.tab .tab-label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: #0f1c2e;
+    -fx-font-weight: bold;
+}
+
+/* --- COMPOSANTS DE CONTENU --- */
+.text-field, .combo-box, .text-area {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 12px;
+    -fx-text-fill: #0f172a;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.02), 5, 0, 0, 2);
+}
+
+.text-field:focused, .combo-box:focused, .text-area:focused {
+    -fx-border-color: #d4af37;
+    -fx-border-width: 1.5px;
+}
+
+.button {
+    -fx-background-color: #0f1c2e;
+    -fx-text-fill: #f1c40f;
+    -fx-background-radius: 8px;
+    -fx-padding: 9px 18px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(15,28,46,0.15), 6, 0, 0, 2);
+}
+
+.button:hover {
+    -fx-background-color: #1e293b;
+    -fx-effect: dropshadow(three-pass-box, rgba(15,28,46,0.25), 8, 0, 0, 3);
+}
+
+.button-accent {
+    -fx-background-color: #991b1b;
+    -fx-text-fill: #ffffff;
+}
+
+.button-accent:hover {
+    -fx-background-color: #b91c1c;
+}
+
+.table-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.03), 8, 0, 0, 3);
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #0f1c2e;
+    -fx-background-radius: 10px 10px 0 0;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #f1c40f;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #f1f5f9;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #f8fafc;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #0f1c2e;
+}
+
+.table-row-cell:selected .text {
+    -fx-fill: #ffffff;
+}
+
+/* BOUTONS DE FENÊTRE */
+.window-controls {
+    -fx-padding: 0 0 0 10px;
+}
+
+.window-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 4px 10px;
+    -fx-background-radius: 4px;
+    -fx-border-color: transparent;
+    -fx-effect: none;
+    -fx-cursor: hand;
+}
+
+.window-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-text-fill: #ffffff;
+}
+
+.window-btn-close:hover {
+    -fx-background-color: #e11d48;
+    -fx-text-fill: #ffffff;
+}
+
+/* FOOTER */
+.footer-bar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1px 0 0 0;
+}
+
+.footer-bar .label {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 12px;
+}

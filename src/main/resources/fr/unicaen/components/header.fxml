@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.unicaen.controller.HeaderController">
+    <children>
+        <!-- BANDEAU BLEU NUIT PRINCIPAL -->
+        <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="header-banner">
+            <padding>
+                <Insets bottom="8.0" left="15.0" right="10.0" top="8.0" />
+            </padding>
+            <children>
+
+                <!-- LOGO À GAUCHE (SUR LA HAUTEUR DES 2 LIGNES) -->
+                <StackPane fx:id="logoContainer" styleClass="logo-box-large">
+                    <children>
+                        <ImageView fx:id="logoImageView" fitHeight="42.0" fitWidth="42.0" pickOnBounds="true" preserveRatio="true" />
+                        <Label fx:id="logoPlaceholder" styleClass="logo-icon-text-large" text="⚜" />
+                    </children>
+                </StackPane>
+
+                <!-- CONTENU À DROITE (LIGNE 1 + LIGNE 2) -->
+                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                    <children>
+
+                        <!-- LIGNE 1 : MENU + INTERACTIONS FENÊTRE -->
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                            <children>
+                                <!-- MENU COMPACT -->
+                                <MenuBar styleClass="header-menu-bar">
+                                    <menus>
+                                        <Menu text="Fichier">
+                                            <items>
+                                                <MenuItem text="Nouveau corpus..." />
+                                                <MenuItem text="Importer un texte..." />
+                                                <SeparatorMenuItem />
+                                                <MenuItem onAction="#onCloseClick" text="Quitter" />
+                                            </items>
+                                        </Menu>
+                                        <Menu text="Édition">
+                                            <items>
+                                                <MenuItem text="Effacer les logs" />
+                                                <MenuItem text="Réinitialiser la base" />
+                                            </items>
+                                        </Menu>
+                                        <Menu text="Analyse">
+                                            <items>
+                                                <MenuItem text="Exécuter GATE" />
+                                                <MenuItem text="Comparer deux auteurs" />
+                                            </items>
+                                        </Menu>
+                                        <Menu text="Aide">
+                                            <items>
+                                                <MenuItem text="Documentation GATE" />
+                                                <MenuItem text="À propos" />
+                                            </items>
+                                        </Menu>
+                                    </menus>
+                                </MenuBar>
+
+                                <Region HBox.hgrow="ALWAYS" />
+
+                                <!-- BOUTONS SYSTÈME (—, □, ✕) -->
+                                <HBox alignment="CENTER_RIGHT" spacing="4.0" styleClass="window-controls">
+                                    <children>
+                                        <Button onAction="#onMinimizeClick" styleClass="window-btn" text="—" />
+                                        <Button onAction="#onMaximizeClick" styleClass="window-btn" text="□" />
+                                        <Button onAction="#onCloseClick" styleClass="window-btn, window-btn-close" text="✕" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </HBox>
+
+                        <!-- LIGNE 2 : TITRE DU LOGICIEL -->
+                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                            <children>
+                                <Label styleClass="header-title" text="Stylométrie" />
+                                <Label styleClass="header-title-sub" text="— UNICAEN L3" />
+                            </children>
+                        </HBox>
+
+                    </children>
+                </VBox>
+
+            </children>
+        </HBox>
+
+        <!-- BARRE D'ONGLETS -->
+        <TabPane fx:id="headerTabPane" tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab text="Accueil" />
+                <Tab text="Gestion du Corpus" />
+                <Tab text="Pipeline GATE" />
+                <Tab text="Statistiques &amp; Analyses" />
+            </tabs>
+        </TabPane>
+    </children>
+</VBox>
