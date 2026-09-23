@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="15.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.unicaen.controller.AuthorsImportController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <children>
+
+        <!-- EN-TÊTE -->
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <children>
+                <VBox spacing="2.0">
+                    <children>
+                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0f1c2e;" text="Importation du Référentiel des Écrivains" />
+                        <Label style="-fx-font-size: 12px; -fx-text-fill: #64748b;" text="Chargez un fichier CSV (ex: autors_fr.csv) contenant les auteurs, URI Wikidata, dates et mouvements." />
+                    </children>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#onSelectFileClick" styleClass="button" text="📂 Choisir un fichier CSV..." />
+            </children>
+        </HBox>
+
+        <!-- BANDEAU FICHIER -->
+        <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: #ffffff; -fx-padding: 10px; -fx-background-radius: 8px; -fx-border-color: #e2e8f0; -fx-border-radius: 8px;">
+            <children>
+                <Label style="-fx-font-weight: bold; -fx-text-fill: #0f1c2e;" text="Fichier sélectionné :" />
+                <Label fx:id="filePathLabel" style="-fx-text-fill: #64748b;" text="Aucun fichier sélectionné" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="statusLabel" style="-fx-font-weight: bold; -fx-text-fill: #d4af37;" text="En attente" />
+            </children>
+        </HBox>
+
+        <!-- TABLE DE PREVISUALISATION -->
+        <TableView fx:id="previewTable" prefHeight="350.0" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colName" prefWidth="200.0" text="Nom de l'Écrivain" />
+                <TableColumn fx:id="colBirthDate" prefWidth="120.0" text="Date de Naissance" />
+                <TableColumn fx:id="colMovement" prefWidth="180.0" text="Mouvement Littéraire" />
+                <TableColumn fx:id="colUri" prefWidth="300.0" text="URI Wikidata" />
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAIN_RESIZE_POLICY" />
+            </columnResizePolicy>
+        </TableView>
+
+        <!-- BARRE DE PROGRESSION & ACTION -->
+        <HBox alignment="CENTER_LEFT" spacing="15.0">
+            <children>
+                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                    <children>
+                        <ProgressBar fx:id="progressBar" maxWidth="1.7976931348623157E308" progress="0.0" />
+                        <Label fx:id="countLabel" style="-fx-font-size: 11px; -fx-text-fill: #64748b;" text="0 ligne(s) prête(s) à être importée(s)" />
+                    </children>
+                </VBox>
+                <Button fx:id="importButton" disable="true" onAction="#onExecuteImportClick" styleClass="button, button-accent" text="⚡ Injecter dans SQLite" />
+            </children>
+        </HBox>
+
+    </children>
+</VBox>

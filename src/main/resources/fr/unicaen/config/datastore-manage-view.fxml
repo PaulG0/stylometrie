@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="10.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="fr.unicaen.controller.list.OeuvresController">
+    <padding>
+        <Insets top="15.0" right="15.0" bottom="15.0" left="15.0" />
+    </padding>
+
+    <!-- Actions -->
+    <HBox spacing="10.0" alignment="CENTER_LEFT">
+        <Button text="Importer un fichier" onAction="#handleImportStory" />
+        <Button text="Importer un DataStore GATE (Auteurs)" onAction="#handleImportDataStore" />
+
+        <Region HBox.hgrow="ALWAYS" />
+
+        <Label text="Afficher par page :" />
+        <ComboBox fx:id="comboLimit" prefWidth="80.0" />
+    </HBox>
+
+    <!-- Référentiel des Œuvres et Textes -->
+    <TableView fx:id="oeuvresTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colId" text="ID" prefWidth="50.0" />
+            <TableColumn fx:id="colAuthor" text="Auteur / Corpus" prefWidth="200.0" />
+            <TableColumn fx:id="colTitle" text="Titre de l'Œuvre" prefWidth="300.0" />
+            <TableColumn fx:id="colPath" text="Référence GATE / Chemin" prefWidth="350.0" />
+        </columns>
+    </TableView>
+
+    <!-- Pagination -->
+    <HBox spacing="10.0" alignment="CENTER_RIGHT">
+        <Button fx:id="btnPrevious" text="Précédent" onAction="#handlePreviousPage" />
+        <Label fx:id="lblPageInfo" text="Page 1 / 1" />
+        <Button fx:id="btnNext" text="Suivant" onAction="#handleNextPage" />
+    </HBox>
+</VBox>

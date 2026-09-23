@@ -262,3 +262,19 @@
     -fx-text-fill: #64748b;
     -fx-font-size: 12px;
 }
+
+.sub-tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: #1e293b;
+}
+
+.sub-tab-pane .tab {
+    -fx-background-color: #334155;
+    -fx-text-fill: #94a3b8;
+    -fx-padding: 4px 12px;
+}
+
+.sub-tab-pane .tab:selected {
+    -fx-background-color: #d4af37;
+    -fx-text-fill: #0f1c2e;
+    -fx-font-weight: bold;
+}

@@ -13,41 +13,45 @@ public class DatabaseManager {
         return DriverManager.getConnection(DB_URL);
     }
 
-    public static void initDatabase() {
-        String createAuthorsTable = """
-            CREATE TABLE IF NOT EXISTS authors (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL UNIQUE
-            );
-        """;
-
-        String createTextsTable = """
-            CREATE TABLE IF NOT EXISTS texts (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                author_id INTEGER,
-                title TEXT NOT NULL,
-                FOREIGN KEY(author_id) REFERENCES authors(id)
-            );
-        """;
-
-        String createMetricsTable = """
-            CREATE TABLE IF NOT EXISTS metrics (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                text_id INTEGER,
-                metric_name TEXT NOT NULL,
-                metric_value REAL NOT NULL,
-                FOREIGN KEY(text_id) REFERENCES texts(id)
-            );
-        """;
-
+    /**
+     * Initialise la base de données SQLite et crée les tables si elles n'existent pas.
+     */
+    public static void initializeDatabase() {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
-            stmt.execute(createAuthorsTable);
-            stmt.execute(createTextsTable);
-            stmt.execute(createMetricsTable);
-            System.out.println("[Database] Base SQLite initialisée.");
+
+            // 1. Table des auteurs (avec métadonnées enrichies)
+            stmt.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS authors (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    wikidata_uri TEXT UNIQUE,
+                    birth_date TEXT,
+                    movement TEXT
+                );
+            """);
+
+            // 2. Table des textes / ouvrages de référence (colonne filepath ajoutée)
+            stmt.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS texts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    author_id INTEGER NOT NULL,
+                    title TEXT NOT NULL,
+                    filepath TEXT,
+                    FOREIGN KEY(author_id) REFERENCES authors(id) ON DELETE CASCADE
+                );
+            """);
+
+            // Altérations au cas où la base de données existe déjà avec un ancien schéma
+            try { stmt.executeUpdate("ALTER TABLE authors ADD COLUMN wikidata_uri TEXT UNIQUE;"); } catch (SQLException ignored) {}
+            try { stmt.executeUpdate("ALTER TABLE authors ADD COLUMN birth_date TEXT;"); } catch (SQLException ignored) {}
+            try { stmt.executeUpdate("ALTER TABLE authors ADD COLUMN movement TEXT;"); } catch (SQLException ignored) {}
+
+            // Migration pour ajouter la colonne filepath si elle manque dans la table texts existante
+            try { stmt.executeUpdate("ALTER TABLE texts ADD COLUMN filepath TEXT;"); } catch (SQLException ignored) {}
+
         } catch (SQLException e) {
-            System.err.println("[Database] Erreur d'initialisation : " + e.getMessage());
+            System.err.println("Erreur lors de l'initialisation de la base SQLite : " + e.getMessage());
         }
     }
 }

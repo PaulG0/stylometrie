@@ -24,7 +24,7 @@
             </padding>
             <children>
 
-                <!-- LOGO À GAUCHE (SUR LA HAUTEUR DES 2 LIGNES) -->
+                <!-- LOGO À GAUCHE -->
                 <StackPane fx:id="logoContainer" styleClass="logo-box-large">
                     <children>
                         <ImageView fx:id="logoImageView" fitHeight="42.0" fitWidth="42.0" pickOnBounds="true" preserveRatio="true" />
@@ -32,20 +32,20 @@
                     </children>
                 </StackPane>
 
-                <!-- CONTENU À DROITE (LIGNE 1 + LIGNE 2) -->
+                <!-- CONTENU À DROITE -->
                 <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                     <children>
 
-                        <!-- LIGNE 1 : MENU + INTERACTIONS FENÊTRE -->
+                        <!-- LIGNE 1 : MENU COMPACT + BOUTONS SYSTEME -->
                         <HBox alignment="CENTER_LEFT" spacing="10.0">
                             <children>
-                                <!-- MENU COMPACT -->
                                 <MenuBar styleClass="header-menu-bar">
                                     <menus>
                                         <Menu text="Fichier">
                                             <items>
                                                 <MenuItem text="Nouveau corpus..." />
                                                 <MenuItem text="Importer un texte..." />
+                                                <MenuItem onAction="#onImportCsvClick" text="Importer les auteurs (CSV)..." />
                                                 <SeparatorMenuItem />
                                                 <MenuItem onAction="#onCloseClick" text="Quitter" />
                                             </items>
@@ -73,7 +73,6 @@
 
                                 <Region HBox.hgrow="ALWAYS" />
 
-                                <!-- BOUTONS SYSTÈME (—, □, ✕) -->
                                 <HBox alignment="CENTER_RIGHT" spacing="4.0" styleClass="window-controls">
                                     <children>
                                         <Button onAction="#onMinimizeClick" styleClass="window-btn" text="—" />
@@ -84,7 +83,7 @@
                             </children>
                         </HBox>
 
-                        <!-- LIGNE 2 : TITRE DU LOGICIEL -->
+                        <!-- LIGNE 2 : TITRE -->
                         <HBox alignment="CENTER_LEFT" spacing="8.0">
                             <children>
                                 <Label styleClass="header-title" text="Stylométrie" />
@@ -98,13 +97,23 @@
             </children>
         </HBox>
 
-        <!-- BARRE D'ONGLETS -->
-        <TabPane fx:id="headerTabPane" tabClosingPolicy="UNAVAILABLE">
+        <!-- ONGLETS PRINCIPAUX -->
+        <TabPane fx:id="mainTabPane" tabClosingPolicy="UNAVAILABLE">
             <tabs>
-                <Tab text="Accueil" />
-                <Tab text="Gestion du Corpus" />
-                <Tab text="Pipeline GATE" />
-                <Tab text="Statistiques &amp; Analyses" />
+                <Tab fx:id="homeTab" text="Accueil" />
+                <Tab fx:id="libraryTab" text="Bibliothèque" />
+                <Tab fx:id="gateTab" text="Pipeline GATE" />
+                <Tab fx:id="statsTab" text="Statistiques &amp; Analyses" />
+            </tabs>
+        </TabPane>
+
+        <!-- SOUS-ONGLETS DE LA BIBLIOTHÈQUE -->
+        <TabPane fx:id="librarySubTabPane" styleClass="sub-tab-pane" tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab fx:id="authorsSubTab" text="👨‍ Écrivains &amp; Auteurs" />
+                <Tab fx:id="worksSubTab" text="📚 Oeuvres &amp; Textes" />
+                <Tab fx:id="searchSubTab" text="🔍 Recherche Avancée" />
+                <Tab fx:id="importSubTab" text="📥 Importation CSV" />
             </tabs>
         </TabPane>
     </children>

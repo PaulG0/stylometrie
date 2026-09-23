@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="15" xmlns="http://javafx.com/fxml/1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="fr.unicaen.controller.list.DataStoreController"
+      stylesheets="@../style.css"
+      VBox.vgrow="ALWAYS">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- En-tête de la vue -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label fx:id="titleLabel" text="Référentiel des Œuvres &amp; Textes" styleClass="view-title" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+    </HBox>
+
+    <!-- Tableau d'affichage des documents GATE / SQLite -->
+    <TableView fx:id="textsTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="idColumn" text="ID" prefWidth="70"/>
+            <TableColumn fx:id="authorColumn" text="Auteur / Corpus" prefWidth="220"/>
+            <TableColumn fx:id="titleColumn" text="Titre de l'Œuvre" prefWidth="300"/>
+            <TableColumn fx:id="pathColumn" text="Référence GATE / Chemin" prefWidth="400"/>
+        </columns>
+        <columnResizePolicy>
+            <TableView fx:constant="UNCONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
+    </TableView>
+</VBox>
