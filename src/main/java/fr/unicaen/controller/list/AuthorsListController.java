@@ -21,8 +21,10 @@ import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import fr.unicaen.controller.dialog.AuthorCardController;
 import fr.unicaen.model.Text;
+import fr.unicaen.service.AuthorImageService;
+
 public class AuthorsListController {
 
     @FXML private Label totalCountLabel;
@@ -30,6 +32,7 @@ public class AuthorsListController {
     @FXML private ComboBox<Integer> pageSizeComboBox;
     @FXML private ToggleButton tableModeBtn;
     @FXML private ToggleButton galleryModeBtn;
+    @FXML private Button btnViewCard;
 
     @FXML private VBox tableViewBox;
     @FXML private ScrollPane galleryScrollView;
@@ -37,6 +40,7 @@ public class AuthorsListController {
 
     @FXML private TableView<Author> authorsTable;
     @FXML private TableColumn<Author, Integer> colId;
+    @FXML private TableColumn<Author, Void> colAction;
     @FXML private TableColumn<Author, String> colName;
     @FXML private TableColumn<Author, String> colBirthDate;
     @FXML private TableColumn<Author, String> colMovement;
@@ -49,9 +53,6 @@ public class AuthorsListController {
     private FilteredList<Author> filteredData;
     private final AnalysisDao analysisDao = new AnalysisDao();
 
-    // Cache local pour ne pas télécharger 10 fois la même image Wikidata
-    private static final ConcurrentHashMap<String, String> imageCache = new ConcurrentHashMap<>();
-
     @FXML
     public void initialize() {
         // Configuration des colonnes
@@ -59,7 +60,63 @@ public class AuthorsListController {
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colBirthDate.setCellValueFactory(new PropertyValueFactory<>("birthDate"));
         colMovement.setCellValueFactory(new PropertyValueFactory<>("movement"));
+        colWorksCount.setCellValueFactory(new PropertyValueFactory<>("worksCount"));
         colUri.setCellValueFactory(new PropertyValueFactory<>("wikidataUri"));
+
+        // Colonne d'interaction avec l'auteur (icône œil)
+        colAction.setCellFactory(col -> new TableCell<Author, Void>() {
+            private final Button btn = new Button("👁️");
+            {
+                btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #f1c40f; -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 2px 7px; -fx-border-color: #d4af37; -fx-border-radius: 4px;");
+                btn.setTooltip(new Tooltip("Consulter la fiche complète de cet auteur"));
+                btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: #0f1c2e; -fx-text-fill: #f1c40f; -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 2px 7px; -fx-border-color: #f1c40f; -fx-border-radius: 4px; -fx-effect: dropshadow(three-pass-box, rgba(212,175,55,0.4), 4, 0, 0, 1);"));
+                btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #f1c40f; -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 2px 7px; -fx-border-color: #d4af37; -fx-border-radius: 4px;"));
+                btn.setOnAction(e -> {
+                    Author author = getTableView().getItems().get(getIndex());
+                    if (author != null) openAuthorCard(author);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getIndex() >= getTableView().getItems().size()) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(btn);
+                    setAlignment(Pos.CENTER);
+                }
+            }
+        });
+
+        // Interaction tableau : double-clic et menu contextuel pour ouvrir la fiche auteur
+        authorsTable.setRowFactory(tv -> {
+            TableRow<Author> row = new TableRow<>();
+
+            // Menu contextuel au clic droit
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem viewCardItem = new MenuItem("👁️ Consulter la fiche complète de l'auteur");
+            viewCardItem.setOnAction(event -> {
+                Author author = row.getItem();
+                if (author != null) openAuthorCard(author);
+            });
+            contextMenu.getItems().add(viewCardItem);
+
+            row.contextMenuProperty().bind(
+                    javafx.beans.binding.Bindings.when(row.emptyProperty())
+                            .then((ContextMenu) null)
+                            .otherwise(contextMenu)
+            );
+
+            // Double clic
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    Author selectedAuthor = row.getItem();
+                    openAuthorCard(selectedAuthor);
+                }
+            });
+            return row;
+        });
 
         // Tailles de pagination
         pageSizeComboBox.setItems(FXCollections.observableArrayList(10, 20, 50, 100));
@@ -142,67 +199,52 @@ public class AuthorsListController {
             Label subLabel = new Label(author.getMovement() != null ? author.getMovement() : "Écrivain");
             subLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #64748b;");
 
-            card.getChildren().addAll(imageContainer, nameLabel, subLabel);
+            card.setCursor(javafx.scene.Cursor.HAND);
+            card.setOnMouseEntered(e -> card.setStyle("-fx-background-color: #ffffff; -fx-padding: 12px; -fx-background-radius: 10px; -fx-border-color: #d4af37; -fx-border-width: 1.5px; -fx-border-radius: 10px; -fx-pref-width: 170px; -fx-effect: dropshadow(three-pass-box, rgba(212,175,55,0.25), 8, 0, 0, 3);"));
+            card.setOnMouseExited(e -> card.setStyle("-fx-background-color: #ffffff; -fx-padding: 12px; -fx-background-radius: 10px; -fx-border-color: #cbd5e1; -fx-border-width: 1px; -fx-border-radius: 10px; -fx-pref-width: 170px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);"));
+            card.setOnMouseClicked(e -> openAuthorCard(author));
+
+            Button btnCard = new Button("👁️ Consulter fiche");
+            btnCard.setStyle("-fx-background-color: rgba(15,28,46,0.08); -fx-text-fill: #0f1c2e; -fx-font-size: 11px; -fx-padding: 4px 8px; -fx-background-radius: 6px; -fx-font-weight: bold; -fx-cursor: hand;");
+            btnCard.setOnAction(e -> {
+                e.consume();
+                openAuthorCard(author);
+            });
+
+            card.getChildren().addAll(imageContainer, nameLabel, subLabel, btnCard);
             galleryFlowPane.getChildren().add(card);
 
-            // Fetch de l'image sur Internet de manière asynchrone pour ne pas freezer l'IHM
-            fetchAuthorImageAsync(author.getWikidataUri(), imgUrl -> {
-                Platform.runLater(() -> {
-                    spinner.setVisible(false);
-                    if (imgUrl != null) {
-                        imgView.setImage(new Image(imgUrl, true));
-                    } else {
-                        // Image par défaut si pas d'image Wikidata trouvée
-                        imgView.setImage(new Image(getClass().getResourceAsStream("/fr/unicaen/images/default-author.png")));
-                    }
-                });
+            // Chargement haute performance et sans blocage 403 via AuthorImageService
+            AuthorImageService.fetchAuthorPhotoAsync(author.getWikidataUri(), author.getName(), img -> {
+                spinner.setVisible(false);
+                if (img != null) {
+                    imgView.setImage(img);
+                }
             });
         }
-    }
-
-    private void fetchAuthorImageAsync(String wikidataUri, java.util.function.Consumer<String> callback) {
-        if (wikidataUri == null || !wikidataUri.contains("Q")) {
-            callback.accept(null);
-            return;
-        }
-
-        String entityId = wikidataUri.substring(wikidataUri.lastIndexOf('/') + 1);
-
-        if (imageCache.containsKey(entityId)) {
-            callback.accept(imageCache.get(entityId));
-            return;
-        }
-
-        new Thread(() -> {
-            try {
-                String apiUrl = "https://www.wikidata.org/wiki/Special:EntityData/" + entityId + ".json";
-                HttpClient client = HttpClient.newHttpClient();
-                HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
-
-                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-                // Regex rapide pour récupérer la propriété P18 (Image Wikimedia)
-                Pattern pattern = Pattern.compile("\"P18\":\\[\\{\"mainsnak\":\\{.*?\"value\":\"([^\"]+)\"");
-                Matcher matcher = pattern.matcher(response.body());
-
-                if (matcher.find()) {
-                    String imageName = matcher.group(1).replace(" ", "_");
-                    // URL directe vers les vignettes Wikimedia Commons
-                    String imageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/" + imageName + "?width=300";
-                    imageCache.put(entityId, imageUrl);
-                    callback.accept(imageUrl);
-                } else {
-                    callback.accept(null);
-                }
-            } catch (Exception e) {
-                callback.accept(null);
-            }
-        }).start();
     }
 
     @FXML
     protected void onRefreshClick() {
         loadAuthorsFromDb();
+    }
+
+    @FXML
+    protected void onViewAuthorCardClick() {
+        Author selected = authorsTable.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            openAuthorCard(selected);
+        } else if (!authorsTable.getItems().isEmpty()) {
+            openAuthorCard(authorsTable.getItems().get(0));
+        } else {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Veuillez sélectionner un auteur dans le tableau ou cliquer sur une carte.");
+            alert.showAndWait();
+        }
+    }
+
+    private void openAuthorCard(Author author) {
+        if (author == null) return;
+        AuthorCardController.open(author, authorsTable.getScene().getWindow(), this::loadAuthorsFromDb);
     }
 
     private void loadAuthorsFromDb() {
@@ -214,23 +256,5 @@ public class AuthorsListController {
         } catch (Exception e) {
             System.err.println("Erreur de chargement des auteurs : " + e.getMessage());
         }
-    }
-
-
-    private void showTextsForAuthor(Author author) {
-        List<Text> texts = analysisDao.getTextsByAuthor(author.getId());
-
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Œuvres de " + author.getName());
-        dialog.setHeaderText("Liste des documents enregistrés pour " + author.getName());
-
-        ListView<String> listView = new ListView<>();
-        for (Text text : texts) {
-            listView.getItems().add(text.getTitle() + " (" + text.getFilePath() + ")");
-        }
-
-        dialog.getDialogPane().setContent(listView);
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-        dialog.showAndWait();
     }
 }

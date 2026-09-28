@@ -55,6 +55,7 @@
                     </children>
                 </HBox>
 
+                <Button fx:id="btnViewCard" onAction="#onViewAuthorCardClick" styleClass="button" text="👁️ Fiche Auteur" />
                 <Button onAction="#onRefreshClick" styleClass="button" text="🔄" />
             </children>
         </HBox>
@@ -69,6 +70,7 @@
                         <TableView fx:id="authorsTable" VBox.vgrow="ALWAYS">
                             <columns>
                                 <TableColumn fx:id="colId" prefWidth="50.0" text="ID" />
+                                <TableColumn fx:id="colAction" prefWidth="65.0" text="Fiche" style="-fx-alignment: CENTER;" />
                                 <TableColumn fx:id="colName" prefWidth="200.0" text="Auteur" />
                                 <TableColumn fx:id="colBirthDate" prefWidth="100.0" text="Naissance" />
                                 <TableColumn fx:id="colMovement" prefWidth="160.0" text="Mouvement" />

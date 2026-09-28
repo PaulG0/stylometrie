@@ -1,5 +1,6 @@
 package fr.unicaen.controller.list;
 
+import fr.unicaen.controller.dialog.AuthorCardController;
 import fr.unicaen.database.AnalysisDao;
 import fr.unicaen.model.Author;
 import fr.unicaen.model.Text;
@@ -97,28 +98,20 @@ public class OeuvresController {
     }
 
     /**
-     * Ouvre une boîte de dialogue affichant la fiche détaillée de l'auteur.
+     * Ouvre la fiche détaillée et enrichie de l'auteur.
      */
     private void openAuthorCard(int authorId, String authorName) {
-        Author author = analysisDao.getAuthorByName(authorName);
-
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Fiche Auteur — " + authorName);
-        alert.setHeaderText("Informations sur " + authorName);
-
-        StringBuilder content = new StringBuilder();
-        if (author != null) {
-            content.append("ID BDD : ").append(author.getId()).append("\n");
-            content.append("Nom complet : ").append(author.getName()).append("\n");
-            content.append("Date de naissance : ").append(author.getBirthDate() != null ? author.getBirthDate() : "N/C").append("\n");
-            content.append("Mouvement littéraire : ").append(author.getMovement() != null ? author.getMovement() : "N/C").append("\n");
-            content.append("URI Wikidata : ").append(author.getWikidataUri() != null ? author.getWikidataUri() : "Non renseigné");
-        } else {
-            content.append("Auteur sélectionné : ").append(authorName);
+        Author author = analysisDao.getAuthorById(authorId);
+        if (author == null) {
+            author = analysisDao.getAuthorByName(authorName);
         }
 
-        alert.setContentText(content.toString());
-        alert.showAndWait();
+        if (author != null) {
+            AuthorCardController.open(author, oeuvresTable.getScene().getWindow(), this::loadData);
+        } else {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Impossible de trouver l'auteur : " + authorName);
+            alert.showAndWait();
+        }
     }
 
     /**

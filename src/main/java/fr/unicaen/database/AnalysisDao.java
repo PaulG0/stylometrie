@@ -50,7 +50,11 @@ public class AnalysisDao {
 
     public List<Author> getAllAuthors() {
         List<Author> authors = new ArrayList<>();
-        String sql = "SELECT id, name, wikidata_uri, birth_date, movement FROM authors ORDER BY name ASC";
+        String sql = "SELECT a.id, a.name, a.wikidata_uri, a.birth_date, a.movement, COUNT(t.id) AS works_count " +
+                "FROM authors a " +
+                "LEFT JOIN texts t ON a.id = t.author_id " +
+                "GROUP BY a.id, a.name, a.wikidata_uri, a.birth_date, a.movement " +
+                "ORDER BY a.name ASC";
 
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement();
@@ -62,7 +66,8 @@ public class AnalysisDao {
                         rs.getString("name"),
                         rs.getString("wikidata_uri"),
                         rs.getString("birth_date"),
-                        rs.getString("movement")
+                        rs.getString("movement"),
+                        rs.getInt("works_count")
                 ));
             }
         } catch (SQLException e) {
@@ -72,7 +77,11 @@ public class AnalysisDao {
     }
 
     public Author getAuthorByName(String name) {
-        String sql = "SELECT id, name, wikidata_uri, birth_date, movement FROM authors WHERE LOWER(name) = LOWER(?)";
+        String sql = "SELECT a.id, a.name, a.wikidata_uri, a.birth_date, a.movement, COUNT(t.id) AS works_count " +
+                "FROM authors a " +
+                "LEFT JOIN texts t ON a.id = t.author_id " +
+                "WHERE LOWER(a.name) = LOWER(?) " +
+                "GROUP BY a.id, a.name, a.wikidata_uri, a.birth_date, a.movement";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -85,7 +94,8 @@ public class AnalysisDao {
                             rs.getString("name"),
                             rs.getString("wikidata_uri"),
                             rs.getString("birth_date"),
-                            rs.getString("movement")
+                            rs.getString("movement"),
+                            rs.getInt("works_count")
                     );
                 }
             }
@@ -93,6 +103,49 @@ public class AnalysisDao {
             System.err.println("Erreur recherche auteur : " + e.getMessage());
         }
         return null;
+    }
+
+    public Author getAuthorById(int id) {
+        String sql = "SELECT a.id, a.name, a.wikidata_uri, a.birth_date, a.movement, COUNT(t.id) AS works_count " +
+                "FROM authors a " +
+                "LEFT JOIN texts t ON a.id = t.author_id " +
+                "WHERE a.id = ? " +
+                "GROUP BY a.id, a.name, a.wikidata_uri, a.birth_date, a.movement";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Author(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getString("wikidata_uri"),
+                            rs.getString("birth_date"),
+                            rs.getString("movement"),
+                            rs.getInt("works_count")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur recherche auteur par ID : " + e.getMessage());
+        }
+        return null;
+    }
+
+    public boolean updateAuthorMetadata(int authorId, String birthDate, String movement) {
+        String sql = "UPDATE authors SET birth_date = ?, movement = ? WHERE id = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, birthDate);
+            pstmt.setString(2, movement);
+            pstmt.setInt(3, authorId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Erreur mise à jour métadonnées auteur : " + e.getMessage());
+        }
+        return false;
     }
 
     public int insertAuthor(Author author) {
