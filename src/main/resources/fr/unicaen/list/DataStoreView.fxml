@@ -22,9 +22,10 @@
     <TableView fx:id="textsTable" VBox.vgrow="ALWAYS">
         <columns>
             <TableColumn fx:id="idColumn" text="ID" prefWidth="70"/>
-            <TableColumn fx:id="authorColumn" text="Auteur / Corpus" prefWidth="220"/>
+            <TableColumn fx:id="actionColumn" text="Auteur" prefWidth="80"/>
+            <TableColumn fx:id="authorColumn" text="Auteur / Corpus" prefWidth="200"/>
             <TableColumn fx:id="titleColumn" text="Titre de l'Œuvre" prefWidth="300"/>
-            <TableColumn fx:id="pathColumn" text="Référence GATE / Chemin" prefWidth="400"/>
+            <TableColumn fx:id="pathColumn" text="Référence GATE / Chemin" prefWidth="370"/>
         </columns>
         <columnResizePolicy>
             <TableView fx:constant="UNCONSTRAINED_RESIZE_POLICY"/>

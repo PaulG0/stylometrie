@@ -25,7 +25,6 @@ import java.util.function.Consumer;
 /**
  * Service haute performance pour le téléchargement et la mise en cache
  * des photos des auteurs depuis Wikimedia Commons et Wikipédia.
- * Résout le problème du blocage HTTP 403 de Wikimedia en utilisant un User-Agent conforme.
  */
 public class AuthorImageService {
 
@@ -40,10 +39,6 @@ public class AuthorImageService {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    /**
-     * Récupère la photo d'un auteur de manière asynchrone à partir de son URI Wikidata.
-     * En cas d'échec ou d'absence de photo, renvoie un avatar régalien généré sur mesure.
-     */
     public static void fetchAuthorPhotoAsync(String wikidataUri, String authorName, Consumer<Image> callback) {
         String qid = AuthorMetadataService.extractQid(wikidataUri);
 
@@ -53,7 +48,6 @@ public class AuthorImageService {
             return;
         }
 
-        // Vérifier si l'image décodée est déjà en cache
         if (imageCache.containsKey(qid)) {
             Image cached = imageCache.get(qid);
             Platform.runLater(() -> callback.accept(cached));
@@ -65,7 +59,6 @@ public class AuthorImageService {
                 String directImageUrl = photoUrlCache.get(qid);
 
                 if (directImageUrl == null) {
-                    // 1. Interroger Wikidata pour récupérer la propriété P18 (nom de fichier Wikimedia)
                     String apiUrl = "https://www.wikidata.org/w/api.php?action=wbgetentities&ids=" + qid
                             + "&props=claims&format=json";
 
@@ -83,18 +76,23 @@ public class AuthorImageService {
                         JsonNode p18 = root.path("entities").path(qid).path("claims").path("P18");
 
                         if (p18.isArray() && p18.size() > 0) {
-                            String fileName = p18.get(0).path("mainsnak").path("datavalue").path("value").asText();
+                            String fileName = p18.get(0)
+                                    .path("mainsnak")
+                                    .path("datavalue")
+                                    .path("value")
+                                    .asText();
+
                             if (fileName != null && !fileName.isBlank()) {
                                 String cleanName = fileName.replace(" ", "_");
                                 directImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/"
-                                        + URLEncoder.encode(cleanName, StandardCharsets.UTF_8) + "?width=350";
+                                        + URLEncoder.encode(cleanName, StandardCharsets.UTF_8)
+                                        + "?width=350";
                                 photoUrlCache.put(qid, directImageUrl);
                             }
                         }
                     }
                 }
 
-                // 2. Télécharger les octets de l'image avec notre User-Agent autorisé
                 if (directImageUrl != null) {
                     downloadAndCacheImage(qid, directImageUrl, authorName, callback);
                 } else {
@@ -107,9 +105,6 @@ public class AuthorImageService {
         }).start();
     }
 
-    /**
-     * Télécharge directement une image depuis une URL HTTP quelconque avec User-Agent valide.
-     */
     public static void downloadAndCacheImage(String cacheKey, String imageUrl, String authorName, Consumer<Image> callback) {
         if (imageUrl == null || imageUrl.isBlank()) {
             fallbackDefault(authorName, callback);
@@ -135,9 +130,11 @@ public class AuthorImageService {
 
                 if (imgResp.statusCode() == 200 && imgResp.body() != null && imgResp.body().length > 0) {
                     byte[] bytes = imgResp.body();
+
                     Platform.runLater(() -> {
                         try {
                             Image fxImage = new Image(new ByteArrayInputStream(bytes));
+
                             if (!fxImage.isError() && fxImage.getWidth() > 0) {
                                 imageCache.put(cacheKey, fxImage);
                                 callback.accept(fxImage);
@@ -162,12 +159,9 @@ public class AuthorImageService {
         Platform.runLater(() -> callback.accept(fallback));
     }
 
-    /**
-     * Génère dynamiquement une image d'avatar par défaut de style régalien
-     * avec les initiales de l'auteur et la fleur de lys dorée.
-     */
     public static Image getOrCreateDefaultAvatar(String authorName) {
         String key = "default_" + (authorName != null ? authorName : "unknown");
+
         if (imageCache.containsKey(key)) {
             return imageCache.get(key);
         }
@@ -176,31 +170,26 @@ public class AuthorImageService {
             Canvas canvas = new Canvas(140, 180);
             GraphicsContext gc = canvas.getGraphicsContext2D();
 
-            // Fond dégradé bleu nuit
             gc.setFill(Color.web("#0f1c2e"));
             gc.fillRect(0, 0, 140, 180);
 
-            // Motif intérieur
             gc.setFill(Color.web("#18283d"));
             gc.fillRoundRect(8, 8, 124, 164, 12, 12);
 
-            // Bordure dorée
             gc.setStroke(Color.web("#d4af37"));
             gc.setLineWidth(2.0);
             gc.strokeRoundRect(8, 8, 124, 164, 12, 12);
 
-            // Fleur de Lys centrale en or
             gc.setFill(Color.web("#f1c40f"));
             gc.setFont(Font.font("Georgia", FontWeight.BOLD, 42));
             gc.fillText("⚜", 48, 85);
 
-            // Initiales de l'auteur en dessous
             String initials = getInitials(authorName);
+
             gc.setFill(Color.web("#cbd5e1"));
             gc.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
             gc.fillText(initials, 70 - (initials.length() * 4.5), 125);
 
-            // Sous-titre
             gc.setFill(Color.web("#94a3b8"));
             gc.setFont(Font.font("Segoe UI", 10));
             gc.fillText("Écrivain", 50, 145);
@@ -208,6 +197,7 @@ public class AuthorImageService {
             WritableImage snap = new WritableImage(140, 180);
             canvas.snapshot(null, snap);
             imageCache.put(key, snap);
+
             return snap;
         } catch (Exception e) {
             return null;
@@ -215,13 +205,23 @@ public class AuthorImageService {
     }
 
     private static String getInitials(String name) {
-        if (name == null || name.isBlank()) return "A";
+        if (name == null || name.isBlank()) {
+            return "A";
+        }
+
         String[] parts = name.trim().split("\\s+");
+
         if (parts.length >= 2) {
-            return parts[0].substring(0, 1).toUpperCase() + "." + parts[parts.length - 1].substring(0, 1).toUpperCase() + ".";
-        } else if (parts[0].length() > 0) {
+            return parts[0].substring(0, 1).toUpperCase()
+                    + "."
+                    + parts[parts.length - 1].substring(0, 1).toUpperCase()
+                    + ".";
+        }
+
+        if (!parts[0].isBlank()) {
             return parts[0].substring(0, 1).toUpperCase();
         }
+
         return "A";
     }
 }

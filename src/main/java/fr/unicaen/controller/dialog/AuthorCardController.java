@@ -4,6 +4,7 @@ import fr.unicaen.database.AnalysisDao;
 import fr.unicaen.model.Author;
 import fr.unicaen.model.AuthorEnrichedData;
 import fr.unicaen.model.Text;
+import fr.unicaen.service.AuthorImageService;
 import fr.unicaen.service.AuthorMetadataService;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
@@ -11,7 +12,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -30,7 +30,6 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import fr.unicaen.service.AuthorImageService;
 public class AuthorCardController {
 
     @FXML private ImageView authorPhotoView;
@@ -137,12 +136,13 @@ public class AuthorCardController {
 
         String qid = AuthorMetadataService.extractQid(author.getWikidataUri());
         if (qid != null) {
-            wikidataIdBadge.setText("🔗 " + qid);
+            wikidataIdBadge.setText(qid);
             btnOpenWikidata.setDisable(false);
         } else {
-            wikidataIdBadge.setText("🔗 Aucun QID");
+            wikidataIdBadge.setText("Aucun QID");
             btnOpenWikidata.setDisable(true);
         }
+
         btnOpenWikipedia.setDisable(true);
 
         // 2. Chargement des textes locaux en BDD SQLite
@@ -159,9 +159,12 @@ public class AuthorCardController {
 
         colTextAction.setCellValueFactory(c -> {
             Text text = c.getValue();
-            Button btnRead = new Button("📖 Lire");
+
+            Button btnRead = new Button("Lire");
+            btnRead.setDisable(false);
             btnRead.setStyle("-fx-background-color: #0f1c2e; -fx-text-fill: #f1c40f; -fx-padding: 4px 10px; -fx-background-radius: 4px; -fx-font-size: 11px; -fx-cursor: hand;");
-            btnRead.setOnAction(e -> openDocumentReader(text));
+            btnRead.setOnAction(event -> openDocumentReader(text));
+
             return new SimpleObjectProperty<>(btnRead);
         });
 
@@ -170,16 +173,11 @@ public class AuthorCardController {
 
         int count = texts.size();
         currentAuthor.setWorksCount(count);
-        worksCountBadge.setText("📚 " + count + " œuvre(s) locale(s)");
+        worksCountBadge.setText(count + " œuvre(s) locale(s)");
         localTextsCountLabel.setText(count + " document(s) enregistré(s)");
 
-        if (count == 0) {
-            noTextsMessageBox.setVisible(true);
-            noTextsMessageBox.setManaged(true);
-        } else {
-            noTextsMessageBox.setVisible(false);
-            noTextsMessageBox.setManaged(false);
-        }
+        noTextsMessageBox.setVisible(count == 0);
+        noTextsMessageBox.setManaged(count == 0);
     }
 
     private void fetchEnrichedMetadata(String qid) {
@@ -192,7 +190,7 @@ public class AuthorCardController {
 
     private void applyEnrichedData(AuthorEnrichedData data) {
         this.currentEnrichedData = data;
-
+        btnSyncDatabase.setDisable(false);
         imageSpinner.setVisible(false);
         bioSpinner.setVisible(false);
 
@@ -310,7 +308,7 @@ public class AuthorCardController {
         if (updated) {
             currentAuthor.setBirthDate(newBirth);
             currentAuthor.setMovement(newMovement);
-            syncStatusLabel.setText("✅ Base locale SQLite mise à jour avec succès !");
+            syncStatusLabel.setText("Base locale SQLite mise à jour avec succès !");
             syncStatusLabel.setStyle("-fx-text-fill: #16a34a; -fx-font-weight: bold; -fx-font-size: 12px;");
 
             if (onAuthorUpdated != null) {
@@ -329,16 +327,25 @@ public class AuthorCardController {
 
     @FXML
     private void handleOpenWikidata() {
-        if (currentEnrichedData != null && currentEnrichedData.getWikidataUri() != null) {
+        if (currentEnrichedData != null
+                && currentEnrichedData.getWikidataUri() != null
+                && !currentEnrichedData.getWikidataUri().isBlank()) {
             openWebPage(currentEnrichedData.getWikidataUri());
-        } else if (currentAuthor.getWikidataUri() != null) {
+            return;
+        }
+
+        if (currentAuthor != null
+                && currentAuthor.getWikidataUri() != null
+                && !currentAuthor.getWikidataUri().isBlank()) {
             openWebPage(currentAuthor.getWikidataUri());
         }
     }
 
     @FXML
     private void handleOpenWikipedia() {
-        if (currentEnrichedData != null && currentEnrichedData.getWikipediaUrl() != null) {
+        if (currentEnrichedData != null
+                && currentEnrichedData.getWikipediaUrl() != null
+                && !currentEnrichedData.getWikipediaUrl().isBlank()) {
             openWebPage(currentEnrichedData.getWikipediaUrl());
         }
     }
